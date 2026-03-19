@@ -39,11 +39,19 @@ public class PlayerMovement : MonoBehaviour
     // Input values (set by callbacks)
     private Vector2 moveInput;
     private Vector2 lookInput;
-    private bool jumpPressed;
+
+    // Jump buffering (allows jumping immediately after landing)
+    public float jumpBufferTime = 0.2f;
+    private float jumpBufferCounter;
+    private bool jumpRequested;
 
     void Awake()
     {
         controller = GetComponent<CharacterController>();
+
+        // Ensure jump state is initialized correctly on start.
+        jumpsRemaining = maxJumps;
+        jumpBufferCounter = 0f;
 
         if (cameraTransform == null && Camera.main != null)
             cameraTransform = Camera.main.transform;
@@ -68,7 +76,10 @@ public class PlayerMovement : MonoBehaviour
     void OnJump(InputValue value)
     {
         if (value.isPressed)
-            jumpPressed = true;
+        {
+            jumpRequested = true;
+            jumpBufferCounter = jumpBufferTime;
+        }
     }
 
     void OnSprint(InputValue value)
@@ -90,10 +101,15 @@ public class PlayerMovement : MonoBehaviour
         HandleMouseLook();
         HandleCrouch();
         HandleMovement();
+
+        // Countdown jump buffer so the player can press jump slightly before landing.
+        if (jumpBufferCounter > 0f)
+            jumpBufferCounter -= Time.deltaTime;
+        else
+            jumpRequested = false;
+
         HandleJump();
         ApplyGravity();
-
-        jumpPressed = false; // consume jump after processing
     }
 
     void HandleMouseLook()
@@ -143,10 +159,12 @@ public class PlayerMovement : MonoBehaviour
         if (controller.isGrounded)
             jumpsRemaining = maxJumps;
 
-        if (jumpPressed && jumpsRemaining > 0)
+        if (jumpRequested && jumpsRemaining > 0)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             jumpsRemaining--;
+            jumpRequested = false;
+            jumpBufferCounter = 0f;
         }
     }
 

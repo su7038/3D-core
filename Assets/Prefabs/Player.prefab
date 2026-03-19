@@ -240,9 +240,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8093f87561f42b0478ecf9ddbd65d5d9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  walkSpeed: 5
-  sprintSpeed: 9
-  crouchSpeed: 2.5
+  walkSpeed: 10
+  sprintSpeed: 18
+  crouchSpeed: 5
   jumpHeight: 1.5
   maxJumps: 1
   gravity: -20
