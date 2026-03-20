@@ -1,34 +1,91 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-public class EnemyFollow : MonoBehaviour
+[RequireComponent(typeof(NavMeshAgent))]
+public class EnemyAI : MonoBehaviour
 {
-    public Transform player;   // De speler
-    public float speed = 3f;   // Snelheid van de enemy
+    [Header("Chase Settings")]
+    public float moveSpeed = 4f;
+    public float detectionRange = 12f;
+    public float updateRate = 0.1f;
+
+    [Header("Wander Settings")]
+    public float wanderRadius = 8f;
+    public float wanderSpeed = 2f;
+
+    private NavMeshAgent agent;
+    private Transform player;
+    private float updateTimer;
+    private bool isChasing = false;
+
+    void Awake()
+    {
+        agent = GetComponent<NavMeshAgent>();
+    }
 
     void Start()
     {
-        // Zoek automatisch de player als die nog niet is ingesteld
-        if (player == null)
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+        if (playerObj == null)
         {
-            GameObject playerObj = GameObject.Find("Player");
-            if (playerObj != null)
-            {
-                player = playerObj.transform;
-            }
+            Debug.LogError("EnemyAI: Geen GameObject gevonden met tag 'Player'!");
+            enabled = false;
+            return;
         }
+
+        player = playerObj.transform;
+        SetNewWanderDestination();
     }
 
     void Update()
     {
-        if (player == null) return;
+        updateTimer += Time.deltaTime;
+        if (updateTimer < updateRate) return;
+        updateTimer = 0f;
 
-        // Richting naar de speler berekenen
-        Vector3 direction = (player.position - transform.position).normalized;
+        if (!agent.isOnNavMesh)
+        {
+            Debug.LogWarning("EnemyAI: Agent staat niet op een NavMesh!");
+            return;
+        }
 
-        // Beweeg richting de speler
-        transform.position += direction * speed * Time.deltaTime;
+        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
-        // (optioneel) laat de enemy naar de speler kijken
-        transform.LookAt(player);
+        if (distanceToPlayer <= detectionRange)
+        {
+            // Chase
+            isChasing = true;
+            agent.speed = moveSpeed;
+            agent.SetDestination(player.position);
+        }
+        else
+        {
+            // Wander
+            isChasing = false;
+            agent.speed = wanderSpeed;
+
+            // Nieuw doel als het huidige bereikt is
+            if (!agent.pathPending && agent.remainingDistance <= agent.stoppingDistance)
+                SetNewWanderDestination();
+        }
+    }
+
+    void SetNewWanderDestination()
+    {
+        Vector3 randomPoint = transform.position + Random.insideUnitSphere * wanderRadius;
+        randomPoint.y = transform.position.y;
+
+        if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
+            agent.SetDestination(hit.position);
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, detectionRange);
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(transform.position, wanderRadius);
     }
 }
