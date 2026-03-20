@@ -4,6 +4,8 @@ using UnityEngine.AI;
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyAI : MonoBehaviour
 {
+    
+
     [Header("Chase Settings")]
     public float moveSpeed = 4f;
     public float detectionRange = 12f;
@@ -37,7 +39,19 @@ public class EnemyAI : MonoBehaviour
         player = playerObj.transform;
         SetNewWanderDestination();
     }
+   private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Time.timeScale = 0f;
+        }
 
+        if (other.CompareTag("Bullet"))
+        {
+            Destroy(other.gameObject);
+            Destroy(gameObject);
+        }
+    }
     void Update()
     {
         updateTimer += Time.deltaTime;
