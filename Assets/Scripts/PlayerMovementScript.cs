@@ -35,6 +35,7 @@ public class PlayerMovement : MonoBehaviour
     private int jumpsRemaining;
     private bool isCrouching;
     private bool isSprinting;
+    private bool isGrounded;
 
     // Input values (set by callbacks)
     private Vector2 moveInput;
@@ -102,6 +103,9 @@ public class PlayerMovement : MonoBehaviour
         HandleCrouch();
         HandleMovement();
 
+        // Refresh grounded status (more robust on slopes than controller.isGrounded alone)
+        isGrounded = CheckGrounded();
+
         // Countdown jump buffer so the player can press jump slightly before landing.
         if (jumpBufferCounter > 0f)
             jumpBufferCounter -= Time.deltaTime;
@@ -154,9 +158,28 @@ public class PlayerMovement : MonoBehaviour
         controller.Move(move * speed * Time.deltaTime);
     }
 
-    void HandleJump()
+    bool CheckGrounded()
     {
         if (controller.isGrounded)
+            return true;
+
+        float checkDistance = 0.15f;
+        float radius = controller.radius * 0.9f;
+        Vector3 origin = transform.position + controller.center;
+
+        // Spherecast down to verify ground contact for slopes where isGrounded may flicker.
+        if (Physics.SphereCast(origin, radius, Vector3.down, out RaycastHit hit, controller.height / 2f + checkDistance,
+            ~0, QueryTriggerInteraction.Ignore))
+        {
+            return hit.normal.y > 0.65f;
+        }
+
+        return false;
+    }
+
+    void HandleJump()
+    {
+        if (isGrounded)
             jumpsRemaining = maxJumps;
 
         if (jumpRequested && jumpsRemaining > 0)
@@ -170,7 +193,7 @@ public class PlayerMovement : MonoBehaviour
 
     void ApplyGravity()
     {
-        if (controller.isGrounded && velocity.y < 0f)
+        if (isGrounded && velocity.y < 0f)
             velocity.y = groundedGravity;
 
         velocity.y += gravity * Time.deltaTime;
