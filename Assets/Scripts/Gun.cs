@@ -1,26 +1,24 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEditor;
 
-public class Gun : MonoBehaviour
+public  class Gun : MonoBehaviour
+
 {
     [Header("Shooting")]
     public Transform muzzle;
     public float bulletSpeed = 30f;
     public float fireRate = 0.2f;
-
     private float nextFireTime = 0f;
-    private GameObject bulletPrefab;
+    [SerializeField] private GameObject bulletPrefab;
     private Camera cam;
+    [SerializeField] private ParticleSystem muzzleFlash;
 
-    private void Start()
-    {
-        bulletPrefab = Resources.Load<GameObject>("Bullet_Pistol_A");
-        cam = Camera.main;
-
-        if (bulletPrefab == null)
-            Debug.LogError("Bullet_Pistol_A niet gevonden! Zorg dat het in de Resources map staat.");
-        Destroy(gameObject, 30f);
-    }
+private void Start()
+{
+    cam = Camera.main;
+    Destroy(gameObject, 30f);
+}
 
     private void Update()
     {
@@ -34,6 +32,9 @@ public class Gun : MonoBehaviour
     private void Shoot()
     {
         if (bulletPrefab == null) return;
+    
+        if (muzzleFlash != null)
+        muzzleFlash.Play();
 
         Ray ray = cam.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         Vector3 targetPoint;

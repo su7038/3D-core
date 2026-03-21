@@ -8,6 +8,8 @@ public class GunPickup : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        Debug.Log("Trigger geraakt door: " + other.gameObject.name + " tag: " + other.tag);
+
         if (other.CompareTag("Player"))
         {
             AttachGunToPlayer(other.transform);
@@ -15,9 +17,14 @@ public class GunPickup : MonoBehaviour
         }
     }
 
+
+
+
+[SerializeField] private GameObject gunPrefab;
+
     private void AttachGunToPlayer(Transform player)
     {
-        GameObject gunPrefab = Resources.Load<GameObject>("Pistol_A");
+        
 
         if (gunPrefab == null)
         {

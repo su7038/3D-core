@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2807719511110031630}
   m_Layer: 0
   m_Name: Enemy 1
-  m_TagString: Untagged
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -42,7 +42,7 @@ NavMeshAgent:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2034159341649230823}
-  m_Enabled: 0
+  m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
   m_Speed: 2
@@ -74,6 +74,7 @@ MonoBehaviour:
   updateRate: 0.1
   wanderRadius: 12
   wanderSpeed: 2
+  logic: {fileID: 0}
 --- !u!136 &2807719511110031630
 CapsuleCollider:
   m_ObjectHideFlags: 0

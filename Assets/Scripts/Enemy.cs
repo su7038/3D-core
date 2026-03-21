@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 [RequireComponent(typeof(NavMeshAgent))]
 public class EnemyAI : MonoBehaviour
+
 {
-    
 
     [Header("Chase Settings")]
     public float moveSpeed = 4f;
@@ -19,31 +21,44 @@ public class EnemyAI : MonoBehaviour
     private Transform player;
     private float updateTimer;
     private bool isChasing = false;
-
+    public LogicScript logic;
     void Awake()
     {
         agent = GetComponent<NavMeshAgent>();
     }
 
-    void Start()
+void Start()
+{
+    logic = GameObject.FindGameObjectWithTag("Logic").GetComponent<LogicScript>();
+    GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+
+    if (playerObj == null)
     {
-        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-
-        if (playerObj == null)
-        {
-            Debug.LogError("EnemyAI: Geen GameObject gevonden met tag 'Player'!");
-            enabled = false;
-            return;
-        }
-
-        player = playerObj.transform;
-        SetNewWanderDestination();
+        Debug.LogError("EnemyAI: Geen GameObject gevonden met tag 'Player'!");
+        enabled = false;
+        return;
     }
+
+    player = playerObj.transform;
+    StartCoroutine(WaitForNavMesh());
+}
+
+IEnumerator WaitForNavMesh()
+{
+    while (!agent.isOnNavMesh)
+        yield return null;
+    
+    SetNewWanderDestination();
+}
    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Player"))
         {
-            Time.timeScale = 0f;
+            SceneManager.LoadScene("Game Over");
+            Time.timeScale = 1f;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+
         }
 
         if (other.CompareTag("Bullet"))
@@ -54,6 +69,11 @@ public class EnemyAI : MonoBehaviour
     }
     void Update()
     {
+{
+    Debug.Log($"isOnNavMesh: {agent.isOnNavMesh}, positie: {transform.position}");
+    // rest van je code
+}
+
         updateTimer += Time.deltaTime;
         if (updateTimer < updateRate) return;
         updateTimer = 0f;
@@ -86,14 +106,15 @@ public class EnemyAI : MonoBehaviour
     }
 
     void SetNewWanderDestination()
-    {
+{
+        if (!agent.isOnNavMesh) return; // extra check
+
         Vector3 randomPoint = transform.position + Random.insideUnitSphere * wanderRadius;
         randomPoint.y = transform.position.y;
 
         if (NavMesh.SamplePosition(randomPoint, out NavMeshHit hit, wanderRadius, NavMesh.AllAreas))
-            agent.SetDestination(hit.position);
-    }
-
+        agent.SetDestination(hit.position);
+}
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.yellow;
