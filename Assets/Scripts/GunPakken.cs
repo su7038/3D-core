@@ -8,7 +8,7 @@ public class GunPickup : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Trigger geraakt door: " + other.gameObject.name + " tag: " + other.tag);
+        
 
         if (other.CompareTag("Player"))
         {
@@ -28,11 +28,11 @@ public class GunPickup : MonoBehaviour
 
         if (gunPrefab == null)
         {
-            Debug.LogError("Pistol_A niet gevonden! Zorg dat het in een 'Resources' map staat.");
+            
             return;
         }
 
-        // Zoek de Camera als child van de Player
+        
         Camera cam = player.GetComponentInChildren<Camera>();
         Transform attachPoint = cam != null ? cam.transform : player;
 

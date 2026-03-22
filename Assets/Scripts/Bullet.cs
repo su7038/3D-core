@@ -11,22 +11,18 @@ public class Bullet : MonoBehaviour
         Destroy(gameObject, lifetime);
         
     }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        
-        Debug.Log("Kogel raak: " + collision.gameObject.name);
-        Destroy(gameObject);
-        
-    }
-
-    
+   
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Enemy"))
         {
             logic.AddScore(1);
-            Debug.Log("Kogel raak: " + other.gameObject.name);
+            
+            Destroy(gameObject);
+        }
+
+        else
+        {
             Destroy(gameObject);
         }
     }

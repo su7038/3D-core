@@ -179,16 +179,18 @@ public class PlayerMovement : MonoBehaviour
 
     void HandleJump()
     {
-        if (isGrounded)
-            jumpsRemaining = maxJumps;
-
         if (jumpRequested && jumpsRemaining > 0)
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             jumpsRemaining--;
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             jumpRequested = false;
             jumpBufferCounter = 0f;
         }
+        
+        if (isGrounded)
+            jumpsRemaining = maxJumps;
+
+
     }
 
     void ApplyGravity()

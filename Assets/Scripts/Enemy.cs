@@ -69,20 +69,9 @@ IEnumerator WaitForNavMesh()
     }
     void Update()
     {
-{
-    Debug.Log($"isOnNavMesh: {agent.isOnNavMesh}, positie: {transform.position}");
-    // rest van je code
-}
-
         updateTimer += Time.deltaTime;
         if (updateTimer < updateRate) return;
         updateTimer = 0f;
-
-        if (!agent.isOnNavMesh)
-        {
-            Debug.LogWarning("EnemyAI: Agent staat niet op een NavMesh!");
-            return;
-        }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
